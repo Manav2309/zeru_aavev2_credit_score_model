@@ -40,3 +40,4 @@ This project builds a machine learning pipeline that assigns a **credit score be
 📦 stacked_model.pkl     <- Trained ensemble model
 📦 scaler.pkl            <- Scaler used for feature normalization
 📄 user-wallet-transactions.json <- Input data (not committed due to file size)
+📦 sample.ipynb          <- Where the model was created, trained and tested on the preprocessed data with scores
