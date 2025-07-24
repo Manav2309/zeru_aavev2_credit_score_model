@@ -1,4 +1,4 @@
-# 📊 analysis.md — Wallet Credit Score Analysis (Aave V2)
+# 📊 Wallet Credit Score Analysis (Aave V2)
 
 ## 🔍 Overview
 
@@ -10,7 +10,7 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 
 ## 📈 Score Distribution
 
-![Score Distribution](./0c452f6f-3cae-4d4d-99c2-555cd0fa683a.png)
+![Score Distribution](./score_distribution.png)
 
 ### Key Observations:
 - The score distribution is **right-skewed**, with a majority of wallets concentrated in the **0–200** range.
@@ -19,9 +19,9 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 
 ---
 
-## 🔍 Model Evaluation: Predicted vs Actual Scores
+## 📊 Model Evaluation: Predicted vs Actual Scores
 
-![Actual vs Predicted Scores](./80bb11fd-95ad-4495-aa7a-03daee910ed9.png)
+![Actual vs Predicted Scores](./actual_vs_predicted.png)
 
 ### Model Insights:
 - The stacked model demonstrates **high predictive alignment**, with most predictions tightly clustered around the diagonal.
@@ -71,4 +71,3 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 This credit scoring model enables transparent, data-driven segmentation of wallet risk profiles on DeFi protocols. The system effectively captures behavioral nuances while remaining extensible for future on-chain credit primitives.
 
 ---
-
