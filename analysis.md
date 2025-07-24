@@ -8,6 +8,21 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 
 ---
 
+## 🎯 Target Variable: Custom Credit Score
+
+Since no labeled target data existed for wallet creditworthiness, a **custom scoring system** was developed based on key behavioral and financial features. These included:
+
+- Transaction activity (frequency and value)
+- Borrow-repay behavior
+- Liquidation history
+- Interaction diversity
+- Temporal consistency and engagement
+- Presence of key fields (e.g., `borrowRate`, `collateralAmount`)
+
+A **stacked regression model** was trained on this engineered `credit_score_raw`, which was then **scaled to a 0–1000 range** using `MinMaxScaler`. This allowed meaningful wallet differentiation across a wide behavioral spectrum in the absence of explicit ground truth.
+
+---
+
 ## ⚙️ Handling Missing Values
 
 During data preparation, missing values were addressed carefully to reduce model bias:
@@ -21,6 +36,7 @@ This hybrid imputation ensured no wallet was unfairly penalized due to missing d
 ---
 
 ## 📈 Score Distribution
+
 ### Key Observations:
 - The score distribution is **right-skewed**, with a majority of wallets concentrated in the **0–200** range.
 - A secondary peak around **400–500** indicates a population of moderately active wallets.
@@ -32,7 +48,6 @@ This hybrid imputation ensured no wallet was unfairly penalized due to missing d
 ---
 
 ## 📊 Model Evaluation: Predicted vs Actual Scores
-
 
 ### Model Insights:
 - The stacked model demonstrates **high predictive alignment**, with most predictions tightly clustered around the diagonal.
