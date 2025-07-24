@@ -8,6 +8,18 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 
 ---
 
+## ⚙️ Handling Missing Values
+
+During data preparation, missing values were addressed carefully to reduce model bias:
+
+- **Zero Imputation (`0.0`)**: Applied to most financial fields where absence indicates no activity (e.g., `collateralAmount`, `borrowRate`, `principalAmount`).
+- **Mean or Median Imputation**: Used for features where a missing value might skew distributions or cause false negatives.
+- **Categorical Fill**: ID fields like `liquidatorId`, `repayerId`, etc., were filled with `"none"` to distinguish true nulls.
+
+This hybrid imputation ensured no wallet was unfairly penalized due to missing data and helped maintain the model's robustness.
+
+---
+
 ## 📈 Score Distribution
 
 ![Score Distribution](./score_distribution.png)
@@ -15,7 +27,10 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 ### Key Observations:
 - The score distribution is **right-skewed**, with a majority of wallets concentrated in the **0–200** range.
 - A secondary peak around **400–500** indicates a population of moderately active wallets.
-- The presence of extreme low scores signals potential **bot activity**, **one-time usage**, or **exploit patterns**.
+- The presence of extreme low scores may result from:
+  - Bot activity or exploit patterns
+  - One-time interactions
+  - Wallets with mostly zero/NaN features filled with imputed values
 
 ---
 
@@ -25,8 +40,8 @@ The model is designed to aid DeFi risk assessment, incentivization, and credit u
 
 ### Model Insights:
 - The stacked model demonstrates **high predictive alignment**, with most predictions tightly clustered around the diagonal.
-- A few visible outliers may represent wallets with **abnormal feature combinations** (e.g., high USD volume but minimal interaction diversity).
-- The model generalizes well across different behavioral patterns, ensuring reliable scoring across heterogeneous users.
+- Outliers may represent wallets with conflicting feature signals (e.g., high borrow volume but poor repayment patterns).
+- The model generalizes across activity levels and is stable on heterogeneous wallet behaviors.
 
 ---
 
