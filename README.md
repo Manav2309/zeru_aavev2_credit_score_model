@@ -27,6 +27,10 @@ This project builds a machine learning pipeline that assigns a **credit score be
    - **Behavioral Metrics:** Interaction with most common `toIds`, count of repeated `toIds`.
 
 4. **Model Inference:**
+   - Models used:
+     `Linear Regression`
+     `Random Forest Regression`
+     ``
    - Pre-trained stacking regression model (`stacked_model.pkl`) loaded via `joblib`.
    - Model predicts a raw `credit_score_raw` between 0 and 1.
    - This score is scaled to a 0–1000 range using `MinMaxScaler`.
