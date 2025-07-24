@@ -16,7 +16,7 @@ This project builds a machine learning pipeline that assigns a **credit score be
    - Normalize nested JSON fields using `json_normalize`.
    - Convert timestamp fields to datetime.
    - Calculate USD value of transactions using `amount * assetPriceUSD`.
-   - Fill missing values for financial fields (`borrowRate`, `collateralAmount`, etc.) with 0 or "none".
+   - Filled missing values for financial fields (`borrowRate`, `collateralAmount`, etc.) with 0 or "none".
 
 3. **Feature Engineering:**
    - **Temporal Behavior:** Time gaps between repeated `toId` interactions.
