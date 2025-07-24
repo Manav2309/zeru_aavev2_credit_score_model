@@ -38,17 +38,23 @@ df_sorted["borrowRate"] = pd.to_numeric(df_sorted["actionData.borrowRate"], erro
 
 
 fill_zero_cols = [
-    "actionData.borrowRate", 
     "actionData.stableTokenDebt", 
     "actionData.variableTokenDebt", 
-    "actionData.collateralAmount", 
     "actionData.collateralAssetPriceUSD", 
-    "actionData.principalAmount", 
     "actionData.borrowAssetPriceUSD"
 ]
+median_cols = [
+    "actionData.borrowRate",
+    "actionData.collateralAmount",
+    "actionData.principalAmount"
+]
+
 
 df_sorted[fill_zero_cols] = df_sorted[fill_zero_cols].fillna(0.0)
-
+for col in median_cols:
+    df_sorted[col] = pd.to_numeric(df_sorted[col], errors='coerce')
+    df_sorted[col] = df_sorted[col].fillna(df_sorted[col].median())
+    
 # Optional: convert ID columns to string 'none'
 id_cols = [
     "actionData.liquidatorId", 
@@ -203,7 +209,9 @@ borrow_presence['borrow_rate_presence'] = (borrow_presence['borrow_rate_presence
 
 final_df = final_df.merge(borrow_presence, on='userWallet', how='left')
 final_df['borrow_rate_presence'] = final_df['borrow_rate_presence'].fillna(0).astype(int)
-
+for col in final_df.columns:
+    if 'mean' in col or 'avg' in col:
+        final_df[col] = final_df[col].fillna(final_df[col].median())
 
 cols = [
     'actionData.collateralAmount',
