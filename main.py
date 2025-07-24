@@ -55,7 +55,6 @@ for col in median_cols:
     df_sorted[col] = pd.to_numeric(df_sorted[col], errors='coerce')
     df_sorted[col] = df_sorted[col].fillna(df_sorted[col].median())
     
-# Optional: convert ID columns to string 'none'
 id_cols = [
     "actionData.liquidatorId", 
     "actionData.repayerId", 
@@ -94,14 +93,11 @@ borrow_agg = (
     .agg(["sum", "mean", "max", "count"])
     .fillna(0)
 )
-# Flatten multi-index column names
 borrow_agg.columns = ['_'.join(col) for col in borrow_agg.columns]
 borrow_agg = borrow_agg.reset_index()
 
-# Compute time difference per wallet + toId group
 df['toId_time_diff'] = df.groupby(['userWallet', 'actionData.toId'])['timestamp'].diff().dt.total_seconds()
 
-# Compute per-wallet average spacing
 avg_toid_spacing = (
     df.groupby('userWallet')['toId_time_diff']
     .mean()
@@ -109,7 +105,6 @@ avg_toid_spacing = (
     .rename('avg_toId_spacing_secs')
 )
 
-# Count repeated toIds per userWallet
 repeat_toid_count = (
     df.groupby(['userWallet', 'actionData.toId'])
     .size()
@@ -119,19 +114,15 @@ repeat_toid_count = (
     .size()
     .rename('repeat_toId_interaction_count')
 )
-# Step 1: Find top 10 toIds overall
 top_10_toids = df['actionData.toId'].value_counts().head(10).index
 
-# Step 2: Flag if toId is in top 10
 df['to_common_toId'] = df['actionData.toId'].isin(top_10_toids).astype(int)
 
-# Step 3: Aggregate per wallet
 tx_to_common_toid = (
     df.groupby('userWallet')['to_common_toId']
     .sum()
     .rename('tx_to_common_toId')
 )
-# Combine all features
 wallet_features = pd.DataFrame(df['userWallet'].unique(), columns=['userWallet'])
 
 wallet_features = (
@@ -141,7 +132,6 @@ wallet_features = (
     .merge(tx_to_common_toid, on='userWallet', how='left')
 )
 
-# Fill any remaining NaNs (wallets without repeated toIds, etc.)
 wallet_features.fillna(0, inplace=True)
 wallet_base = df.groupby('userWallet').agg(
     tx_count=('txHash', 'count'),
@@ -164,11 +154,9 @@ df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s').dt.tz_localize(None)
 df['createdAt'] = pd.to_datetime(df['createdAt']).dt.tz_localize(None)
 df['updatedAt'] = pd.to_datetime(df['updatedAt']).dt.tz_localize(None)
 
-# Compute lag features
 df['created_lag'] = (df['createdAt'] - df['timestamp']).dt.total_seconds()
 df['updated_lag'] = (df['updatedAt'] - df['timestamp']).dt.total_seconds()
 
-# Aggregate lag features per wallet
 lag_features = df.groupby('userWallet').agg(
     avg_created_lag=('created_lag', 'mean'),
     max_created_lag=('created_lag', 'max'),
@@ -176,7 +164,6 @@ lag_features = df.groupby('userWallet').agg(
     max_updated_lag=('updated_lag', 'max')
 ).reset_index()
 
-# Merge into final_df
 final_df = final_df.merge(lag_features, on='userWallet', how='left')  
 final_df = final_df.merge(borrow_agg, on="userWallet", how="left").fillna(0)
 
@@ -193,7 +180,6 @@ scaler = MinMaxScaler()
 scaled_feats = scaler.fit_transform(final_df[score_features])
 scaled_df = pd.DataFrame(scaled_feats, columns=score_features)
 
-# Replace or concatenate with final_df
 for col in score_features:
     final_df[f'scaled_{col}'] = scaled_df[col]
     
@@ -221,15 +207,12 @@ cols = [
     'actionData.borrowRate'
 ]
 
-# Create binary flags
 for col in cols:
     flag_col = f'has_{col.split(".")[-1]}'
     df[flag_col] = df[col].notna().astype(int)
 
-# Group by wallet and sum flags
 activity_flags = df.groupby('userWallet')[[f'has_{col.split(".")[-1]}' for col in cols]].sum().reset_index()
 
-# Convert counts > 0 into 1 (i.e., presence flags)
 for col in activity_flags.columns:
     if col != 'userWallet':
         activity_flags[col] = (activity_flags[col] > 0).astype(int)
@@ -269,8 +252,6 @@ def get_score_band(score):
     else:
         return 'Ideal behavior / top-tier wallets'
 
-# Apply to each wallet's predicted score
 final_df['score_band'] = final_df['predicted_credit_score'].apply(get_score_band)
 
-# Export final output
 final_df[['userWallet', 'predicted_credit_score', 'score_band']].to_csv("wallet_scores.csv", index=False)
