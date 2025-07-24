@@ -21,9 +21,6 @@ This hybrid imputation ensured no wallet was unfairly penalized due to missing d
 ---
 
 ## 📈 Score Distribution
-
-![Score Distribution](./score_distribution.png)
-
 ### Key Observations:
 - The score distribution is **right-skewed**, with a majority of wallets concentrated in the **0–200** range.
 - A secondary peak around **400–500** indicates a population of moderately active wallets.
@@ -36,7 +33,6 @@ This hybrid imputation ensured no wallet was unfairly penalized due to missing d
 
 ## 📊 Model Evaluation: Predicted vs Actual Scores
 
-![Actual vs Predicted Scores](./actual_vs_predicted.png)
 
 ### Model Insights:
 - The stacked model demonstrates **high predictive alignment**, with most predictions tightly clustered around the diagonal.
