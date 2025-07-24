@@ -1,48 +1,42 @@
-# DeFi Credit Scoring using Aave V2 Protocol
+# Aave V2 Wallet Credit Scoring Model
 
-## 🔍 Overview
+## 📌 Objective
 
-This project assigns a **credit score between 0 and 1000** to DeFi wallets based solely on their historical transaction behavior on the Aave V2 protocol. The goal is to identify **responsible**, **risky**, or **bot-like** wallets using a feature-rich ML pipeline.
-
-> **Higher scores = more reliable users**,  
-> **Lower scores = suspicious or exploitative behavior**.
+This project builds a machine learning pipeline that assigns a **credit score between 0 and 1000** to DeFi wallets using historical transaction behavior from the **Aave V2 protocol**. The goal is to detect and differentiate between responsible wallets and those exhibiting risky or bot-like behavior.
 
 ---
 
-## 🧠 Approach
+## 🧠 Methodology
 
-1. **Data Source**:  
-   Raw transaction-level JSON data from Aave V2 (100K records).
+1. **Data Ingestion:**
+   - The input is a raw JSON file containing ~100K user transactions from the Aave V2 protocol.
+   - Each transaction includes actions like `deposit`, `borrow`, `repay`, `liquidationcall`, etc.
 
-2. **Preprocessing**:
-   - Converted timestamps
-   - Cleaned nested JSON fields
-   - Standardized numerical columns
-   - Computed USD value of transactions
+2. **Data Preprocessing:**
+   - Normalize nested JSON fields using `json_normalize`.
+   - Convert timestamp fields to datetime.
+   - Calculate USD value of transactions using `amount * assetPriceUSD`.
+   - Fill missing values for financial fields (`borrowRate`, `collateralAmount`, etc.) with 0 or "none".
 
-3. **Feature Engineering**:
-   - Aggregated borrow behavior: sums, averages, max
-   - Interaction behavior with `toId`:
-     - Average time spacing
-     - Count of repeated interactions
-     - Interaction with top 10 most common `toId`s
-   - Lag features: time difference between transaction and `createdAt`, `updatedAt`
-   - Borrow collateral & debt metrics
-   - Action type counts (`borrow`, `repay`, `liquidation`, etc.)
+3. **Feature Engineering:**
+   - **Temporal Behavior:** Time gaps between repeated `toId` interactions.
+   - **Financial Metrics:** Aggregates (sum, mean, max, count) of loan-related fields per wallet.
+   - **Activity Stats:** Borrow/repay/deposit frequency, total and average transaction value.
+   - **Lag Analysis:** Delay between creation/update timestamps and actual interaction time.
+   - **Binary Flags:** Indicators for presence of key fields (e.g., `has_borrowRate`, `has_collateralAmount`).
+   - **Behavioral Metrics:** Interaction with most common `toIds`, count of repeated `toIds`.
 
-4. **Scoring Logic**:
-   - Applied **MinMaxScaler** on selected features
-   - Weights manually assigned based on financial intuition
-   - Custom formula used to compute `credit_score_raw`
-   - Final score scaled to range **0–1000**
-   - Categorized into `low`, `medium`, `high` risk classes
-
-5. **Model Prediction** *(optional)*:
-   - Trained ensemble (StackingRegressor) using selected features
-   - Stored as `stacked_model.pkl` with corresponding `scaler.pkl`
-   - Used in prediction script for automatic scoring
+4. **Model Inference:**
+   - Pre-trained stacking regression model (`stacked_model.pkl`) loaded via `joblib`.
+   - Model predicts a raw `credit_score_raw` between 0 and 1.
+   - This score is scaled to a 0–1000 range using `MinMaxScaler`.
 
 ---
 
-## 🛠️ File Structure
+## 🏗️ Architecture
 
+```text
+📦 main.py               <- One-step script to load JSON and generate scores
+📦 stacked_model.pkl     <- Trained ensemble model
+📦 scaler.pkl            <- Scaler used for feature normalization
+📄 user-wallet-transactions.json <- Input data (not committed due to file size)
