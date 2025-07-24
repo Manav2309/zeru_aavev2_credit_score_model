@@ -238,6 +238,16 @@ x_scaled = scaler.transform(x)
 predictions = model.predict(x_scaled)
 
 final_df['predicted_credit_score'] = predictions
-final_df[['userWallet', 'predicted_credit_score']].to_csv("wallet_scores.csv", index=False)
+
+def score_to_label(score):
+    if score < 300:
+        return 'low'
+    elif score < 600:
+        return 'medium'
+    else:
+        return 'high'
+
+final_df['risk_class'] = final_df['predicted_credit_score'].apply(score_to_label)
 
 
+final_df[['userWallet', 'predicted_credit_score','risk_class']].to_csv("wallet_scores.csv", index=False)
