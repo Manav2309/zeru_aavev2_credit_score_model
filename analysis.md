@@ -4,7 +4,6 @@
 
 This document presents an analytical summary of the credit scoring model developed for wallets interacting with the Aave V2 protocol. Based on transaction-level behavioral signals, each wallet is assigned a **credit score between 0 and 1000**, with higher scores indicating healthier, more responsible financial behavior.
 
-The model is designed to aid DeFi risk assessment, incentivization, and credit underwriting decisions.
 
 ---
 
