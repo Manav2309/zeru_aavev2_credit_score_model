@@ -2,53 +2,56 @@
 
 ## 📌 Objective
 
-This project builds a machine learning pipeline that assigns a **credit score between 0 and 1000** to DeFi wallets using historical transaction behavior from the **Aave V2 protocol**. The goal is to detect and differentiate between responsible wallets and those exhibiting risky or bot-like behavior.
+This project builds a machine learning pipeline that assigns a **credit score between 0 and 1000** to DeFi wallets using their historical transaction behavior on the **Aave V2 protocol**. The goal is to identify responsible users, detect risky or suspicious wallets, and enable smarter DeFi lending decisions.
 
 ---
 
 ## 🧠 Methodology
 
-1. **Data Ingestion:**
-   - The input is a raw JSON file containing ~100K user transactions from the Aave V2 protocol.
-   - Each transaction includes actions like `deposit`, `borrow`, `repay`, `liquidationcall`, etc.
+### 1. Data Ingestion
+- Raw JSON file (~100K records) contains Aave V2 user transactions.
+- Transactions include actions like `deposit`, `borrow`, `repay`, `redeem`, and `liquidationcall`.
 
-2. **Data Preprocessing:**
-   - Normalize nested JSON fields using `json_normalize`.
-   - Convert timestamp fields to datetime.
-   - Calculate USD value of transactions using `amount * assetPriceUSD`.
-   - Filled missing values using a combination of strategies:
-     - **0** for missing numeric values in financial columns.
-     - **"none"** for categorical ID fields like `liquidatorId`, `repayerId`.
-     - **Mean or median** imputation for selected features where 0 may bias the model.
-   - Removed unnecessary columns and parsed timestamps into lag features.
+### 2. Data Preprocessing
+- Flattened nested JSON using `json_normalize`.
+- Converted timestamp fields to readable datetime.
+- Computed USD value for each transaction (`amount × assetPriceUSD`).
+- **Missing value handling:**
+  - `0` for missing numeric values (e.g., `collateralAmount`, `borrowRate`).
+  - `"none"` for categorical fields (`liquidatorId`, `repayerId`).
+  - Used **mean/median** imputation where `0` would introduce bias.
+- Derived lag features between timestamps (`createdAt`, `updatedAt` vs `timestamp`).
 
-3. **Feature Engineering:**
-   - **Temporal Behavior:** Time gaps between repeated `toId` interactions.
-   - **Financial Metrics:** Aggregates (sum, mean, max, count) of loan-related fields per wallet.
-   - **Activity Stats:** Borrow/repay/deposit frequency, total and average transaction value.
-   - **Lag Analysis:** Delay between creation/update timestamps and actual interaction time.
-   - **Binary Flags:** Indicators for presence of key fields (e.g., `has_borrowRate`, `has_collateralAmount`).
-   - **Behavioral Metrics:** Interaction with most common `toIds`, count of repeated `toIds`.
+### 3. Feature Engineering
+- **Temporal behavior:** Time gaps between repeated `toId` interactions.
+- **Financial metrics:** Aggregates (sum, mean, max, count) per wallet for loan-related fields.
+- **Activity stats:** Borrow/repay/deposit frequency, transaction volume.
+- **Lag analysis:** Delays between event creation/update and execution time.
+- **Binary flags:** Indicators for presence of fields like `borrowRate`, `principalAmount`.
+- **Behavioral patterns:** Interaction with popular `toIds`, repeated interaction count.
 
-4. **Model Inference:**
-   - Multiple base models were used:
-     - `Linear Regression`
-     - `Random Forest Regressor` (with tuned hyperparameters)
-     - `Gradient Boosting Regressor`
-   - These were stacked into a **meta-learner ensemble** and trained on the engineered features.
-   - The final model (`stacked_model.pkl`) was loaded using `joblib`.
-   - Predicted `credit_score_raw` (0 to 1) was scaled to the range **0–1000** using `MinMaxScaler`.
+### 4. Credit Score Creation
+- A **custom score** (our target) was created using the engineered wallet features.
+- This raw score was scaled to a **0–1000** range using `MinMaxScaler`.
+
+### 5. Model Training & Inference
+- Used and compared multiple models:
+  - `Linear Regression`
+  - `Random Forest Regressor` (with tuned hyperparameters)
+  - `Gradient Boosting Regressor`
+- Built a **stacked ensemble model** using these as base learners.
+- Final predictions were generated using `stacked_model.pkl` and scaled appropriately.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Project Structure
 
 ```text
-📦 main.py                     <- One-step script to load JSON and generate scores
-📄 user-wallet-transactions.json <- Input data (not committed due to size limits)
-📦 stacked_model.pkl           <- Trained ensemble model
-📦 scaler.pkl                  <- Scaler used for feature normalization
-📄 sample.ipynb                <- Training notebook with model development
-📄 README.md                   <- Project documentation
-📄 analysis.md                 <- Detailed score band interpretation and analysis
-📄 wallet_scores.csv           <- Output CSV with wallet credit scores (userWallet, score, label)
+📦 main.py                     <- Main script to load data and generate scores
+📄 user-wallet-transactions.json <- Input transaction data (excluded from repo)
+📦 stacked_model.pkl           <- Trained ensemble model file
+📦 scaler.pkl                  <- Scaler used for normalizing features
+📄 sample.ipynb                <- Notebook with feature engineering + model training
+📄 README.md                   <- This documentation
+📄 analysis.md                 <- Score distribution analysis & behavioral insights
+📄 wallet_scores.csv           <- Output: userWallet + credit_score + score_band
